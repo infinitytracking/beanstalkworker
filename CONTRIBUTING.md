@@ -5,7 +5,7 @@ email, or any other method with the owner of this repository before making a cha
 
 ## Issue Guideline
 
-Please check the [existing issues](https://github.com/tomponline/beanstalkworker/issues) to see if your feedback has already been reported.
+Please check the [existing issues](https://github.com/infinitytracking/beanstalkworker/issues) to see if your feedback has already been reported.
 
 Give as many relevant details you can, such as:
 1. What version of Go (`go version`) and `dep` (`git describe --tags`) are you using??

@@ -1,16 +1,15 @@
-[![GoDoc](https://godoc.org/github.com/tomponline/beanstalkworker?status.svg)](https://godoc.org/github.com/tomponline/beanstalkworker)
 # beanstalkworker
 A helper library for creating beanstalkd consumer processes.
 
 ## Usage
 
-```go get -u github.com/tomponline/beanstalkworker```
+```go get -u github.com/infinitytracking/beanstalkworker```
 
 ## Docs/Examples
 
 Please see Go Docs for usage and examples:
 
-https://godoc.org/github.com/tomponline/beanstalkworker
+https://godoc.org/github.com/infinitytracking/beanstalkworker
 
 ## Aims
 
