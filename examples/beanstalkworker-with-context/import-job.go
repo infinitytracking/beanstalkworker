@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/tomponline/beanstalkworker"
+	"github.com/infinitytracking/beanstalkworker"
 )
 
 // ImportJobData represents the job data that arrives from the import-jobs queue

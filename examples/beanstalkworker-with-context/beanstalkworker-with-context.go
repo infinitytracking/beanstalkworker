@@ -9,7 +9,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/tomponline/beanstalkworker"
+	"github.com/infinitytracking/beanstalkworker"
 )
 
 const (

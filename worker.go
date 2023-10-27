@@ -6,6 +6,7 @@ import (
 	"github.com/beanstalkd/go-beanstalk"
 	"reflect"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -191,7 +192,7 @@ func (w *Worker) getNextJob(jobCh chan *RawJob, tubes *beanstalk.TubeSet) {
 	}
 
 	//Cache tube job was received from in the job.
-	job.tube = stats["tube"]
+	job.tube = strings.Trim(stats["tube"], "\"")
 
 	///Convert string age into time.Duration and cache in job.
 	age, err := strconv.Atoi(stats["age"])

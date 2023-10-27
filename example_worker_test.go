@@ -1,6 +1,6 @@
 package beanstalkworker_test
 
-import "github.com/tomponline/beanstalkworker"
+import "github.com/infinitytracking/beanstalkworker"
 import "context"
 import "os"
 import "os/signal"
