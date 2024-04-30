@@ -61,7 +61,7 @@ func signalHandler(cancel context.CancelFunc) {
 
 //Custom Logging Example
 
-// MockLogger provides custom logging.
+// MyLogger provides custom logging.
 type MyLogger struct {
 }
 
