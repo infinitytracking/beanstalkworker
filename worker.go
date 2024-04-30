@@ -3,20 +3,29 @@ package beanstalkworker
 import (
 	"context"
 	"encoding/json"
-	"github.com/beanstalkd/go-beanstalk"
 	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/beanstalkd/go-beanstalk"
 )
 
 // Handler provides an interface type for callback functions.
 type Handler interface{}
 
-// Worker represents a single process that is connecting to beanstalkd
+type WorkerClient interface {
+	Subscribe(tube string, cb Handler)
+	SetNumWorkers(numWorkers int)
+	SetLogger(cl CustomLogger)
+	SetUnmarshalErrorAction(action string)
+	Run(ctx context.Context)
+}
+
+// worker represents a single process that is connecting to beanstalkd
 // and is consuming jobs from one or more tubes.
-type Worker struct {
+type worker struct {
 	addr                 string
 	tubeSubs             map[string]func(*RawJob)
 	numWorkers           int
@@ -27,8 +36,8 @@ type Worker struct {
 
 // NewWorker creates a new worker process,
 // but does not actually connect to beanstalkd server yet.
-func NewWorker(addr string) *Worker {
-	return &Worker{
+func NewWorker(addr string) WorkerClient {
+	return &worker{
 		addr:                 addr,
 		tubeSubs:             make(map[string]func(*RawJob)),
 		log:                  NewDefaultLogger(),
@@ -38,12 +47,12 @@ func NewWorker(addr string) *Worker {
 
 // SetNumWorkers sets the number of concurrent workers threads that should be started.
 // Each thread establishes a separate connection to the beanstalkd server.
-func (w *Worker) SetNumWorkers(numWorkers int) {
+func (w *worker) SetNumWorkers(numWorkers int) {
 	w.numWorkers = numWorkers
 }
 
 // SetLogger switches logging to use a custom Logger.
-func (w *Worker) SetLogger(cl CustomLogger) {
+func (w *worker) SetLogger(cl CustomLogger) {
 	w.log.Info = cl.Info
 	w.log.Infof = cl.Infof
 	w.log.Error = cl.Error
@@ -51,7 +60,7 @@ func (w *Worker) SetLogger(cl CustomLogger) {
 }
 
 // Subscribe adds a handler function to be run for jobs coming from a particular tube.
-func (w *Worker) Subscribe(tube string, cb Handler) {
+func (w *worker) Subscribe(tube string, cb Handler) {
 	w.tubeSubs[tube] = func(job *RawJob) {
 		jobVal := reflect.ValueOf(job)
 		cbFunc := reflect.ValueOf(cb)
@@ -76,7 +85,7 @@ func (w *Worker) Subscribe(tube string, cb Handler) {
 
 // Run starts one or more worker threads based on the numWorkers value.
 // If numWorkers is set to zero or less then 1 worker is started.
-func (w *Worker) Run(ctx context.Context) {
+func (w *worker) Run(ctx context.Context) {
 	if w.numWorkers <= 0 {
 		w.numWorkers = 1
 	}
@@ -95,7 +104,7 @@ func (w *Worker) Run(ctx context.Context) {
 }
 
 // SetUnmarshalErrorAction defines what to do if there is an unmarshal error.
-func (w *Worker) SetUnmarshalErrorAction(action string) {
+func (w *worker) SetUnmarshalErrorAction(action string) {
 	// If this action is different than Delete, Bury or Release, the last one will be chosen
 	// as the default action in case of an unmarshal error, via the method job.unmarshalErrorHandling.
 	if action != ActionDeleteJob && action != ActionBuryJob {
@@ -106,8 +115,8 @@ func (w *Worker) SetUnmarshalErrorAction(action string) {
 }
 
 // startWorker activates a single worker and attempts to maintain a connection to the beanstalkd server.
-func (w *Worker) startWorker(ctx context.Context) {
-	defer w.log.Info("Worker stopped!")
+func (w *worker) startWorker(ctx context.Context) {
+	defer w.log.Info("worker stopped!")
 	defer w.wg.Done()
 
 	for {
@@ -168,7 +177,7 @@ func (w *Worker) startWorker(ctx context.Context) {
 }
 
 // getNextJob retrieves the next job from the tubes being watched.
-func (w *Worker) getNextJob(jobCh chan *RawJob, tubes *beanstalk.TubeSet) {
+func (w *worker) getNextJob(jobCh chan *RawJob, tubes *beanstalk.TubeSet) {
 	id, body, err := tubes.Reserve(60 * time.Second)
 	job := &RawJob{
 		id:   id,
@@ -269,7 +278,7 @@ func (w *Worker) getNextJob(jobCh chan *RawJob, tubes *beanstalk.TubeSet) {
 }
 
 // subHandler finds and executes any subcriber function for a job.
-func (w *Worker) subHandler(job *RawJob) {
+func (w *worker) subHandler(job *RawJob) {
 	tube := job.GetTube()
 	if cb, ok := w.tubeSubs[tube]; ok {
 		cb(job)

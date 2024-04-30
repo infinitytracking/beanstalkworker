@@ -48,7 +48,7 @@ func Example_worker() {
 	bsWorker.Run(ctx)
 }
 
-//signalHandler catches OS signals for program to end.
+// signalHandler catches OS signals for program to end.
 func signalHandler(cancel context.CancelFunc) {
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT)
@@ -61,27 +61,27 @@ func signalHandler(cancel context.CancelFunc) {
 
 //Custom Logging Example
 
-//MyLogger provides custom logging.
+// MockLogger provides custom logging.
 type MyLogger struct {
 }
 
-//Info logs a custom info message regarding the job.
+// Info logs a custom info message regarding the job.
 func (l *MyLogger) Info(v ...interface{}) {
 	log.Print("MyInfo: ", fmt.Sprint(v...))
 }
 
-//Infof logs a custom info message regarding the job.
+// Infof logs a custom info message regarding the job.
 func (l *MyLogger) Infof(format string, v ...interface{}) {
 	format = "MyInfof: " + format
 	log.Print(fmt.Sprintf(format, v...))
 }
 
-//Error logs a custom error message regarding the job.
+// Error logs a custom error message regarding the job.
 func (l *MyLogger) Error(v ...interface{}) {
 	log.Print("MyError: ", fmt.Sprint(v...))
 }
 
-//Errorf logs a custom error message regarding the job.
+// Errorf logs a custom error message regarding the job.
 func (l *MyLogger) Errorf(format string, v ...interface{}) {
 	format = "MyErrorf: " + format
 	log.Print(fmt.Sprintf(format, v...))
