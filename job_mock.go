@@ -1,8 +1,9 @@
 package beanstalkworker
 
 import (
-	"github.com/beanstalkd/go-beanstalk"
 	"time"
+
+	"github.com/beanstalkd/go-beanstalk"
 )
 
 type MockJob struct {
