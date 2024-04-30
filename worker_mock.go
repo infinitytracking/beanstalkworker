@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"sync"
 )
 
 // MockLogger A custom logger that must implement Info() Infof(), Error() and Errorf() to
@@ -33,11 +32,9 @@ func (l *MockLogger) Errorf(format string, v ...interface{}) {
 }
 
 type MockWorker struct {
-	addr       string
 	tubeSubs   map[string]func(*MockJob)
 	tubeJobs   map[string]*MockJob
 	numWorkers int
-	wg         sync.WaitGroup
 	log        *Logger
 }
 
