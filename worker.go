@@ -36,7 +36,7 @@ type worker struct {
 
 // NewWorker creates a new worker process,
 // but does not actually connect to beanstalkd server yet.
-func NewWorker(addr string) WorkerClient {
+func NewWorker(addr string) *worker {
 	return &worker{
 		addr:                 addr,
 		tubeSubs:             make(map[string]func(*RawJob)),

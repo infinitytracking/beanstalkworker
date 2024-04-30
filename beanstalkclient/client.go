@@ -20,7 +20,7 @@ type beanstalkClient struct {
 	tube *beanstalk.Tube
 }
 
-func New(c *beanstalk.Conn, name string) Client {
+func New(c *beanstalk.Conn, name string) *beanstalkClient {
 	return &beanstalkClient{
 		tube: &beanstalk.Tube{Conn: c, Name: name},
 	}
