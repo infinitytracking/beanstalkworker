@@ -10,19 +10,19 @@ import "fmt"
 import "time"
 
 func Example_worker() {
-	//Setup context for cancelling beanstalk worker.
+	//Setup context for cancelling beanstalk Worker.
 	ctx, cancel := context.WithCancel(context.Background())
 
-	//Start up signal handler that will cleanly shutdown beanstalk worker.
+	//Start up signal handler that will cleanly shutdown beanstalk Worker.
 	go signalHandler(cancel)
 
-	//Define a new worker process - how to connect to the beanstalkd server.
+	//Define a new Worker process - how to connect to the beanstalkd server.
 	bsWorker := beanstalkworker.NewWorker("127.0.0.1:11300")
 
 	//Optional custom logger - see below.
 	bsWorker.SetLogger(&MyLogger{})
 
-	//Set concurrent worker threads to 2.
+	//Set concurrent Worker threads to 2.
 	bsWorker.SetNumWorkers(2)
 
 	//Job is deleted from the queue if unmarshal error appears. We can
@@ -43,12 +43,12 @@ func Example_worker() {
 		handler.Run(jobData)
 	})
 
-	//Run the beanstalk worker, this blocks until the context is cancelled.
+	//Run the beanstalk Worker, this blocks until the context is cancelled.
 	//It will also handle reconnecting to beanstalkd server automatically.
 	bsWorker.Run(ctx)
 }
 
-//signalHandler catches OS signals for program to end.
+// signalHandler catches OS signals for program to end.
 func signalHandler(cancel context.CancelFunc) {
 	sigc := make(chan os.Signal, 1)
 	signal.Notify(sigc, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT)
@@ -61,27 +61,27 @@ func signalHandler(cancel context.CancelFunc) {
 
 //Custom Logging Example
 
-//MyLogger provides custom logging.
+// MyLogger provides custom logging.
 type MyLogger struct {
 }
 
-//Info logs a custom info message regarding the job.
+// Info logs a custom info message regarding the job.
 func (l *MyLogger) Info(v ...interface{}) {
 	log.Print("MyInfo: ", fmt.Sprint(v...))
 }
 
-//Infof logs a custom info message regarding the job.
+// Infof logs a custom info message regarding the job.
 func (l *MyLogger) Infof(format string, v ...interface{}) {
 	format = "MyInfof: " + format
 	log.Print(fmt.Sprintf(format, v...))
 }
 
-//Error logs a custom error message regarding the job.
+// Error logs a custom error message regarding the job.
 func (l *MyLogger) Error(v ...interface{}) {
 	log.Print("MyError: ", fmt.Sprint(v...))
 }
 
-//Errorf logs a custom error message regarding the job.
+// Errorf logs a custom error message regarding the job.
 func (l *MyLogger) Errorf(format string, v ...interface{}) {
 	format = "MyErrorf: " + format
 	log.Print(fmt.Sprintf(format, v...))
@@ -107,7 +107,7 @@ func (handler *Job1Handler) LogError(a ...interface{}) {
 	handler.JobManager.LogError("Job1 error: ", fmt.Sprint(a...))
 }
 
-// Run is executed by the beanstalk worker when a Job1 type job is received.
+// Run is executed by the beanstalk Worker when a Job1 type job is received.
 func (handler *Job1Handler) Run(jobData Job1Data) {
 	handler.LogInfo("Starting job with commonVar value: ", handler.commonVar)
 	handler.LogInfo("Job Data received: ", jobData)

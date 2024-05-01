@@ -3,16 +3,25 @@ package beanstalkworker
 import (
 	"context"
 	"encoding/json"
-	"github.com/beanstalkd/go-beanstalk"
 	"reflect"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/beanstalkd/go-beanstalk"
 )
 
 // Handler provides an interface type for callback functions.
 type Handler interface{}
+
+type WorkerClient interface {
+	Subscribe(tube string, cb Handler)
+	SetNumWorkers(numWorkers int)
+	SetLogger(cl CustomLogger)
+	SetUnmarshalErrorAction(action string)
+	Run(ctx context.Context)
+}
 
 // Worker represents a single process that is connecting to beanstalkd
 // and is consuming jobs from one or more tubes.
@@ -25,7 +34,7 @@ type Worker struct {
 	unmarshalErrorAction string
 }
 
-// NewWorker creates a new worker process,
+// NewWorker creates a new Worker process,
 // but does not actually connect to beanstalkd server yet.
 func NewWorker(addr string) *Worker {
 	return &Worker{
@@ -74,8 +83,8 @@ func (w *Worker) Subscribe(tube string, cb Handler) {
 	}
 }
 
-// Run starts one or more worker threads based on the numWorkers value.
-// If numWorkers is set to zero or less then 1 worker is started.
+// Run starts one or more Worker threads based on the numWorkers value.
+// If numWorkers is set to zero or less then 1 Worker is started.
 func (w *Worker) Run(ctx context.Context) {
 	if w.numWorkers <= 0 {
 		w.numWorkers = 1
@@ -87,7 +96,7 @@ func (w *Worker) Run(ctx context.Context) {
 	}
 
 	for i := 0; i < w.numWorkers; i++ {
-		w.wg.Add(1) //Increment wait group count to represent new worker.
+		w.wg.Add(1) //Increment wait group count to represent new Worker.
 		go w.startWorker(ctx)
 	}
 
@@ -105,7 +114,7 @@ func (w *Worker) SetUnmarshalErrorAction(action string) {
 	w.unmarshalErrorAction = action
 }
 
-// startWorker activates a single worker and attempts to maintain a connection to the beanstalkd server.
+// startWorker activates a single Worker and attempts to maintain a connection to the beanstalkd server.
 func (w *Worker) startWorker(ctx context.Context) {
 	defer w.log.Info("Worker stopped!")
 	defer w.wg.Done()
