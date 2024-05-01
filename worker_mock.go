@@ -108,7 +108,7 @@ func (w *MockWorker) Subscribe(tube string, cb Handler) {
 
 func (w *MockWorker) Run(ctx context.Context) {
 	if w.numWorkers <= 0 {
-		w.log.Error("No worker threads defined, cannot proceed.")
+		w.log.Error("No Worker threads defined, cannot proceed.")
 		return
 
 	}
